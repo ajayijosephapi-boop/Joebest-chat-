@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Joebest Chat</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#e5ddd5;
+  height:100vh;
+  overflow:hidden;
+}
+
+.app{
+  width:100%;
+  max-width:500px;
+  height:100vh;
+  margin:auto;
+  background:#efeae2;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER */
+.header{
+  background:#075e54;
+  color:white;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.header-buttons{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.header-btn{
+  border:0;
+  background:transparent;
+  color:white;
+  font-size:20px;
+  cursor:pointer;
+  padding:5px;
+}
+
+/* TABS */
+.tabs{
+  background:#075e54;
+  color:white;
+  display:flex;
+  justify-content:space-around;
+  padding:8px 0 0;
+}
+
+.tab{
+  flex:1;
+  text-align:center;
+  padding:10px 4px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.tab.active{
+  border-bottom:3px solid white;
+  font-weight:bold;
+}
+
+/* CHAT LIST */
+.chat-list{
+  flex:1;
+  overflow-y:auto;
+}
+
+.user{
+  background:white;
+  padding:13px;
+  display:flex;
+  align-items:center;
+  border-bottom:1px solid #ddd;
+  cursor:pointer;
+}
+
+.user:hover{
+  background:#f5f5f5;
+}
+
+.avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:#25d366;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:22px;
+  margin-right:12px;
+}
+
+.user-info{
+  flex:1;
+}
+
+.user-name{
+  font-weight:bold;
+  font-size:16px;
+}
+
+.last-message{
+  color:#777;
+  font-size:13px;
+  margin-top:4px;
+}
+
+.unread{
+  background:#25d366;
+  color:white;
+  border-radius:50%;
+  min-width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+}
+
+/* CHAT SCREEN */
+.chat-screen{
+  display:none;
+  flex-direction:column;
+  height:100%;
+}
+
+.chat-header{
+  background:#075e54;
+  color:white;
+  padding:10px;
+  display:flex;
+  align-items:center;
+}
+
+.back{
+  font-size:28px;
+  margin-right:12px;
+  cursor:pointer;
+}
+
+.chat-avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#25d366;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:10px;
+}
+
+.chat-name{
+  font-weight:bold;
+}
+
+.chat-status{
+  font-size:12px;
+  opacity:.8;
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:12px;
+  background:#efeae2;
+}
+
+.message{
+  max-width:75%;
+  padding:8px 10px;
+  margin:6px 0;
+  border-radius:8px;
+  font-size:14px;
+  position:relative;
+  word-wrap:break-word;
+}
+
+.sent{
+  background:#dcf8c6;
+  margin-left:auto;
+}
+
+.received{
+  background:white;
+  margin-right:auto;
+}
+
+.message-time{
+  font-size:10px;
+  color:#777;
+  margin-left:8px;
+}
+
+.message-status{
+  font-size:13px;
+  margin-left:4px;
+}
+
+/* INPUT */
+.input-area{
+  display:flex;
+  align-items:center;
+  padding:7px;
+  background:#f0f0f0;
+}
+
+.message-input{
+  flex:1;
+  border:none;
+  outline:none;
+  border-radius:22px;
+  padding:11px 15px;
+  font-size:14px;
+}
+
+.send-btn{
+  width:45px;
+  height:45px;
+  margin-left:7px;
+  border:none;
+  border-radius:50%;
+  background:#128c7e;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* SETTINGS */
+.settings{
+  display:none;
+  position:absolute;
+  right:8px;
+  top:55px;
+  background:white;
+  width:190px;
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+  z-index:20;
+}
+
+.settings div{
+  padding:14px;
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+}
+
+.settings div:hover{
+  background:#f5f5f5;
+}
+
+/* CALL MESSAGE */
+.call-message{
+  text-align:center;
+  padding:10px;
+  background:#d9fdd3;
+  margin:10px;
+  border-radius:10px;
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+
+    <div class="logo">
+      Joebest Chat
+    </div>
+
+    <div class="header-buttons">
+
+      <!-- AUDIO CALL -->
+      <button
+        class="header-btn"
+        onclick="startAudioCall()"
+        title="Audio Call">
+        📞
+      </button>
+
+      <!-- VIDEO CALL -->
+      <button
+        class="header-btn"
+        onclick="startVideoCall()"
+        title="Video Call">
+        🎥
+      </button>
+
+      <!-- SETTINGS -->
+      <button
+        class="header-btn"
+        onclick="toggleSettings()"
+        title="Settings">
+        ⚙️
+      </button>
+
+    </div>
+  </div>
+
+  <!-- SETTINGS MENU -->
+  <div class="settings" id="settings">
+
+    <div onclick="alert('Profile')">
+      👤 Profile
+    </div>
+
+    <div onclick="alert('Privacy settings')">
+      🔒 Privacy
+    </div>
+
+    <div onclick="alert('Notifications')">
+      🔔 Notifications
+    </div>
+
+    <div onclick="clearCurrentChat()">
+      🗑️ Clear Chat
+    </div>
+
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+
+    <div
+      class="tab active"
+      onclick="showTab('all',this)">
+      All
+    </div>
+
+    <div
+      class="tab"
+      onclick="showTab('unread',this)">
+      Unread
+    </div>
+
+    <div
+      class="tab"
+      onclick="showTab('groups',this)">
+      👥 Groups
+    </div>
+
+  </div>
+
+  <!-- CHAT LIST -->
+  <div class="chat-list" id="chatList">
+
+    <div
+      class="user"
+      data-type="all"
+      onclick="openChat('User 1')">
+
+      <div class="avatar">
+        👤
+      </div>
+
+      <div class="user-info">
+
+        <div class="user-name">
+          User 1
+        </div>
+
+        <div
+          class="last-message"
+          id="last-User1">
+          Start chatting
+        </div>
+
+      </div>
+
+      <div
+        class="unread"
+        id="unread-User1"
+        style="display:none;">
+        1
+      </div>
+
+    </div>
+
+
+    <div
+      class="user"
+      data-type="all"
+      onclick="openChat('User 2')">
+
+      <div class="avatar">
+        👤
+      </div>
+
+      <div class="user-info">
+
+        <div class="user-name">
+          User 2
+        </div>
+
+        <div
+          class="last-message"
+          id="last-User2">
+          Start chatting
+        </div>
+
+      </div>
+
+      <div
+        class="unread"
+        id="unread-User2"
+        style="display:none;">
+        1
+      </div>
+
+    </div>
+
+
+    <!-- GROUP -->
+    <div
+      class="user"
+      data-type="group"
+      onclick="openChat('My Group')">
+
+      <div class="avatar">
+        😂
+      </div>
+
+      <div class="user-info">
+
+        <div class="user-name">
+          My Group
+        </div>
+
+        <div class="last-message">
+          Group chat
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- CHAT SCREEN -->
+  <div
+    class="chat-screen"
+    id="chatScreen">
+
+    <div class="chat-header">
+
+      <div
+        class="back"
+        onclick="closeChat()">
+        ‹
+      </div>
+
+      <div class="chat-avatar">
+        👤
+      </div>
+
+      <div>
+
+        <div
+          class="chat-name"
+          id="chatName">
+          User 1
+        </div>
+
+        <div class="chat-status">
+          online
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="messages"
+      id="messages">
+    </div>
+
+
+    <div class="input-area">
+
+      <input
+        type="text"
+        id="messageInput"
+        class="message-input"
+        placeholder="Type a message..."
+        onkeydown="handleEnter(event)"
+      >
+
+      <button
+        class="send-btn"
+        onclick="sendMessage()">
+        ➤
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- FIREBASE -->
+<script type="module">
+
+import {
+  initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+/* YOUR FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+  apiKey:
+  "AIzaSyAqfn0MPi0BLiFMWGY6yVA23IauZCjkux8",
+
+  authDomain:
+  "joebest-chat.firebaseapp.com",
+
+  projectId:
+  "joebest-chat",
+
+  storageBucket:
+  "joebest-chat.firebasestorage.app",
+
+  messagingSenderId:
+  "371712941166",
+
+  appId:
+  "1:371712941166:web:96a0c396e7a6d76c0bda7f",
+
+  measurementId:
+  "G-T13FR9VX9P"
+};
+
+
+/* INITIALIZE FIREBASE */
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getFirestore(app);
+
+
+let currentUser = "";
+let unsubscribe = null;
+
+
+/* OPEN CHAT */
+
+window.openChat = function(user){
+
+  currentUser = user;
+
+  document
+    .getElementById("chatName")
+    .textContent = user;
+
+  document
+    .getElementById("chatList")
+    .style.display = "none";
+
+  document
+    .querySelector(".tabs")
+    .style.display = "none";
+
+  document
+    .querySelector(".header")
+    .style.display = "none";
+
+  document
+    .getElementById("chatScreen")
+    .style.display = "flex";
+
+  loadMessages(user);
+};
+
+
+/* CLOSE CHAT */
+
+window.closeChat = function(){
+
+  if(unsubscribe){
+
+    unsubscribe();
+    unsubscribe = null;
+
+  }
+
+  document
+    .getElementById("chatScreen")
+    .style.display = "none";
+
+  document
+    .getElementById("chatList")
+    .style.display = "block";
+
+  document
+    .querySelector(".tabs")
+    .style.display = "flex";
+
+  document
+    .querySelector(".header")
+    .style.display = "flex";
+};
+
+
+/* SEND MESSAGE */
+
+window.sendMessage = async function(){
+
+  const input =
+    document.getElementById("messageInput");
+
+  const text =
+    input.value.trim();
+
+  if(!text || !currentUser)
+    return;
+
+  input.value = "";
+
+  try{
+
+    await addDoc(
+      collection(db,"messages"),
+      {
+
+        chat: currentUser,
+
+        sender: "me",
+
+        text: text,
+
+        time: serverTimestamp(),
+
+        seen: false
+
+      }
+    );
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Message could not be sent."
+    );
+
+  }
+
+};
+
+
+/* LOAD MESSAGES */
+
+function loadMessages(user){
+
+  const messagesBox =
+    document.getElementById("messages");
+
+  messagesBox.innerHTML = "";
+
+  if(unsubscribe){
+
+    unsubscribe();
+
+  }
+
+  const q =
+    query(
+      collection(db,"messages"),
+      orderBy("time","asc")
+    );
+
+
+  unsubscribe =
+    onSnapshot(q,(snapshot)=>{
+
+      messagesBox.innerHTML = "";
+
+
+      snapshot.forEach(doc=>{
+
+        const data =
+          doc.data();
+
+
+        if(data.chat !== user)
+          return;
+
+
+        const message =
+          document.createElement("div");
+
+
+        message.className =
+          "message " +
+          (
+            data.sender === "me"
+            ? "sent"
+            : "received"
+          );
+
+
+        let time = "";
+
+
+        if(data.time){
+
+          const date =
+            data.time.toDate();
+
+          time =
+            date.toLocaleTimeString(
+              [],
+              {
+                hour:"2-digit",
+                minute:"2-digit"
+              }
+            );
+
+        }
+
+
+        message.innerHTML =
+
+        `
+        ${escapeHTML(data.text)}
+
+        <span class="message-time">
+          ${time}
+        </span>
+
+        ${
+          data.sender === "me"
+          ?
+          '<span class="message-status">✓✓</span>'
+          :
+          ''
+        }
+        `;
+
+
+        messagesBox
+          .appendChild(message);
+
+      });
+
+
+      messagesBox.scrollTop =
+        messagesBox.scrollHeight;
+
+    });
+
+}
+
+
+/* PROTECT MESSAGE HTML */
+
+function escapeHTML(text){
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+/* ENTER TO SEND */
+
+window.handleEnter =
+function(event){
+
+  if(event.key === "Enter"){
+
+    event.preventDefault();
+
+    sendMessage();
+
+  }
+
+};
+
+
+/* AUDIO CALL */
+
+window.startAudioCall =
+function(){
+
+  if(!currentUser){
+
+    alert(
+      "Open a chat first, then tap 📞."
+    );
+
+    return;
+
+  }
+
+
+  const box =
+    document.getElementById("messages");
+
+
+  const call =
+    document.createElement("div");
+
+
+  call.className =
+    "call-message";
+
+
+  call.textContent =
+    "📞 Audio call started with "
+    + currentUser;
+
+
+  box.appendChild(call);
+
+
+  box.scrollTop =
+    box.scrollHeight;
+
+};
+
+
+/* VIDEO CALL */
+
+window.startVideoCall =
+function(){
+
+  if(!currentUser){
+
+    alert(
+      "Open a chat first, then tap 🎥."
+    );
+
+    return;
+
+  }
+
+
+  const box =
+    document.getElementById("messages");
+
+
+  const call =
+    document.createElement("div");
+
+
+  call.className =
+    "call-message";
+
+
+  call.textContent =
+    "🎥 Video call started with "
+    + currentUser;
+
+
+  box.appendChild(call);
+
+
+  box.scrollTop =
+    box.scrollHeight;
+
+};
+
+</script>
+
+
+<script>
+
+/* SETTINGS */
+
+function toggleSettings(){
+
+  const settings =
+    document.getElementById("settings");
+
+
+  settings.style.display =
+
+    settings.style.display === "block"
+
+    ? "none"
+
+    : "block";
+
+}
+
+
+/* CLEAR CHAT */
+
+function clearCurrentChat(){
+
+  if(
+    confirm(
+      "Clear this chat from the screen?"
+    )
+  ){
+
+    document
+      .getElementById("messages")
+      .innerHTML = "";
+
+  }
+
+}
+
+
+/* TABS */
+
+function showTab(type,element){
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(tab =>
+
+      tab.classList
+        .remove("active")
+
+    );
+
+
+  element.classList
+    .add("active");
+
+
+  const users =
+    document
+      .querySelectorAll(".user");
+
+
+  users.forEach(user =>{
+
+
+    if(type === "all"){
+
+      user.style.display =
+        "flex";
+
+    }
+
+
+    else if(type === "groups"){
+
+      user.style.display =
+
+        user.dataset.type === "group"
+
+        ? "flex"
+
+        : "none";
+
+    }
+
+
+    else if(type === "unread"){
+
+      const unread =
+        user.querySelector(".unread");
+
+
+      user.style.display =
+
+        unread &&
+        unread.style.display !== "none"
+
+        ? "flex"
+
+        : "none";
+
+    }
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
